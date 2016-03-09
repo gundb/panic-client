@@ -1,0 +1,36 @@
+{
+  "name": "panic-client",
+  "version": "0.0.1",
+  "description": "Test client for panic-server",
+  "main": "build/index.js",
+  "dependencies": {
+    "object-assign-deep": "0.0.4",
+    "socket.io-client": "^1.4.5"
+  },
+  "devDependencies": {
+    "gulp-minify": "0.0.5",
+    "gulp-watch": "^4.3.5"
+  },
+  "scripts": {
+    "test": "jasmine",
+    "build": "gulp"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/PsychoLlama/panic-client.git"
+  },
+  "keywords": [
+    "distributed",
+    "test",
+    "runner",
+    "framework",
+    "decentralized",
+    "suite"
+  ],
+  "author": "Jesse Gibson <jesse@gundb.io> (http://techllama.com)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/PsychoLlama/panic-client/issues"
+  },
+  "homepage": "https://github.com/PsychoLlama/panic-client#readme"
+}
