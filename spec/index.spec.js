@@ -26,6 +26,11 @@ describe('The panic interface', function () {
 		expect(panic.hasOwnProperty('connection')).toBe(true);
 	});
 
+	it('should export the client ID', function () {
+		expect(panic.clientID).toEqual(jasmine.any(String));
+		expect(panic.clientID.length).toBeGreaterThan(5);
+	});
+
 	it('should default the socket to "null"', function () {
 		expect(panic.connection).toBe(null);
 	});
@@ -95,7 +100,7 @@ describe('The panic interface', function () {
 		cb(TDO = {});
 	});
 
-	it('should parse the TDO on "test"', function () {
+	it('should parse the TDO on "test" event', function () {
 		var cb = panic.connect(url).listeners('test')[0];
 		panic.events.on('test', function test(TDO) {
 			expect(TDO.cbs[0]).toEqual(jasmine.any(Function));

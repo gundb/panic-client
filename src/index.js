@@ -4,6 +4,7 @@
 var io = require('socket.io-client');
 var Emitter = require('events');
 var parse = require('./configuration/parse');
+var runner = require('./framework/runner');
 var panic;
 
 function subscribe(socket) {
@@ -11,10 +12,21 @@ function subscribe(socket) {
 	var events = panic.events;
 	socket.on('test', function (TDO) {
 		TDO.cbs = parse(TDO.cbs);
+		var listeners = events.listenerCount('test');
+
+		// no async middleware
+		if (!listeners) {
+			return socket.emit('ready', panic.clientID);
+		}
+
+		events.on('run', function () {
+			runner(TDO);
+		});
+
 		events.emit('test', TDO);
 	});
 
-	socket.on('run', function () {
+	socket.on('run', function (TDO) {
 		events.emit('run');
 	});
 }
@@ -31,7 +43,8 @@ function connect(url) {
 module.exports = panic = {
 	connect: connect,
 	connection: null,
-	events: new Emitter()
+	events: new Emitter(),
+	clientID: String.random()
 };
 
 if (typeof window !== 'undefined') {
