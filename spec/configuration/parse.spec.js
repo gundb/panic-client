@@ -25,11 +25,11 @@ describe('The client callback parser', function () {
 		expect(output).toEqual(jasmine.any(Array));
 	});
 
-	it('should return a parsed objects containing callbacks', function () {
+	it('should return an array of callbacks', function () {
 		var output = parse([
 			condition()
 		]);
-		expect(output[0]).toEqual(jasmine.any(Object));
+		expect(output[0]).toEqual(jasmine.any(Function));
 	});
 
 	it('should filter against the conditional method', function () {
@@ -48,7 +48,7 @@ describe('The client callback parser', function () {
 		expect(output.length).toBe(1);
 	});
 
-	it('should only return a list of objects', function () {
+	it('should only return a list of functions', function () {
 		var output = parse([
 			condition(true),
 			condition(false),
@@ -57,7 +57,7 @@ describe('The client callback parser', function () {
 		]);
 		expect(output.length).toBe(3);
 		output.forEach(function (cb) {
-			expect(cb).toEqual(jasmine.any(Object));
+			expect(cb).toEqual(jasmine.any(Function));
 		});
 	});
 

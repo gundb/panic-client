@@ -30,10 +30,9 @@ module.exports = function (array) {
 	}
 	return array.filter(condition).map(function (obj) {
 		// parse the callbacks
-		obj.cb = Function.parse(obj.cb);
-		return obj;
-	}).filter(function (obj) {
+		return Function.parse(obj.cb);
+	}).filter(function (cb) {
 		// filter out non-functions
-		return typeof obj.cb === 'function';
+		return typeof cb === 'function';
 	});
 };
