@@ -8,12 +8,11 @@
     "socket.io-client": "^1.4.5"
   },
   "devDependencies": {
-    "gulp-minify": "0.0.5",
-    "gulp-watch": "^4.3.5"
+    "webpack": "^1.12.14"
   },
   "scripts": {
     "test": "jasmine",
-    "build": "gulp"
+    "build": "webpack --watch"
   },
   "repository": {
     "type": "git",

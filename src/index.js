@@ -5,29 +5,31 @@ var io = require('socket.io-client');
 var Emitter = require('events');
 var parse = require('./configuration/parse');
 var runner = require('./framework/runner');
+var assign = require('object-assign-deep');
 var panic;
 
 function subscribe(socket) {
 
-	var events = panic.events;
 	socket.on('test', function (TDO) {
-		TDO.cbs = parse(TDO.cbs);
-		var listeners = events.listenerCount('test');
+		parse(TDO);
+		var listeners = panic.listenerCount('test');
+
+		// Remove me!!
+		runner(TDO);
 
 		// no async middleware
 		if (!listeners) {
-			return socket.emit('ready', panic.clientID);
+			return socket.emit('ready', {
+				clientID: panic.clientID,
+				testID: TDO.ID
+			});
 		}
 
-		events.on('run', function () {
-			runner(TDO);
-		});
-
-		events.emit('test', TDO);
+		panic.emit('test', TDO);
 	});
 
 	socket.on('run', function (TDO) {
-		events.emit('run');
+		panic.emit('run', TDO);
 	});
 }
 
@@ -40,12 +42,12 @@ function connect(url) {
 	return socket;
 }
 
-module.exports = panic = {
-	connect: connect,
+panic = module.exports = new Emitter();
+assign(module.exports, {
+	server: connect,
 	connection: null,
-	events: new Emitter(),
-	clientID: String.random()
-};
+	clientID: String.random(10)
+});
 
 if (typeof window !== 'undefined') {
 	window.panic = panic;

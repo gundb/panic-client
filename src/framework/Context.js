@@ -6,7 +6,7 @@ var assign = require('object-assign-deep');
 function Context(test) {
 	this.env = {};
 	if (test instanceof Object) {
-		assign(this.env, test.env);
+		assign(this.env, test.config.env);
 		if (typeof test.timeout === 'number') {
 			this.timeout = test.timeout || this.timeout;
 		}

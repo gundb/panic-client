@@ -24,7 +24,7 @@ function condition(obj) {
 	return result();
 }
 
-module.exports = function (array) {
+function cbs(array) {
 	if (!array) {
 		return [];
 	}
@@ -35,4 +35,9 @@ module.exports = function (array) {
 		// filter out non-functions
 		return typeof cb === 'function';
 	});
+}
+
+module.exports = function (TDO) {
+	TDO.config.cbs = cbs(TDO.config.cbs);
+	return TDO;
 };

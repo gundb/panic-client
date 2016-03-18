@@ -8,7 +8,8 @@ module.exports = function (test) {
 		return;
 	}
 	var ctx = new Context(test);
-	test.cbs.forEach(function (cb) {
+
+	test.config.cbs.forEach(function (cb) {
 		cb.call(ctx, ctx, ctx.done);
 	});
 };
