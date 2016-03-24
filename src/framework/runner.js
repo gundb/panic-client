@@ -23,7 +23,7 @@ panic.on('test', function (TDO) {
 	var listeners = panic.listenerCount('test');
 
 	if (listeners === 1) {
-		panic.emit('ready', TDO.ID);
+		panic.connection.emit('ready', TDO.ID);
 	}
 });
 

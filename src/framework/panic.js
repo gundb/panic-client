@@ -24,6 +24,8 @@ function connect(url) {
 	var socket = io.connect(url);
 	panic.connection = socket;
 
+	socket.emit('ID', panic.clientID);
+
 	subscribe(socket);
 
 	return socket;
@@ -34,13 +36,6 @@ assign(module.exports, {
 	server: connect,
 	connection: null,
 	clientID: String.random(10)
-});
-
-panic.on('ready', function (ID) {
-	panic.connection.emit('ready', {
-		clientID: panic.clientID,
-		testID: ID
-	});
 });
 
 require('./runner');

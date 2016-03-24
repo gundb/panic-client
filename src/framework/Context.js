@@ -1,16 +1,16 @@
-/*jslint node: true*/
+/*jslint node: true, nomen: true*/
 'use strict';
 
 var assign = require('object-assign-deep');
+var panic = require('./panic');
 
 function Context(test) {
+	this._ = {
+		test: test
+	};
 	this.env = {};
-	if (test instanceof Object) {
-		assign(this.env, test.config.env);
-		if (typeof test.timeout === 'number') {
-			this.timeout = test.timeout || this.timeout;
-		}
-	}
+
+	assign(this.env, test.config.env);
 }
 
 Context.prototype = {
@@ -18,7 +18,12 @@ Context.prototype = {
 
 	// default timeout
 	timeout: false,
-	done: function () {},
+	done: function () {
+		panic.connection.emit('done', {
+			testID: this._.test.ID,
+			clientID: panic.clientID
+		});
+	},
 	fail: function () {}
 };
 
