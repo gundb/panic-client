@@ -2,7 +2,7 @@
   "name": "panic-client",
   "version": "0.0.1",
   "description": "Test client for panic-server",
-  "main": "build/index.js",
+  "main": "src/index.js",
   "dependencies": {
     "object-assign-deep": "0.0.4",
     "socket.io-client": "^1.4.5"
