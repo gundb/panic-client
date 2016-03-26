@@ -11,6 +11,9 @@ function Context(test) {
 	this.env = {};
 
 	assign(this.env, test.config.env);
+
+	this.done = this.done.bind(this);
+	this.fail = this.fail.bind(this);
 }
 
 Context.prototype = {
@@ -18,13 +21,50 @@ Context.prototype = {
 
 	// default timeout
 	timeout: false,
+
+	/*
+	 * Mark a test as finished.
+	 * Calling `done` more than
+	 * once does nothing.
+	 **/
 	done: function () {
-		panic.connection.emit('done', {
-			testID: this._.test.ID,
-			clientID: panic.clientID
-		});
+		return this._terminate();
 	},
-	fail: function () {}
+
+	/*
+	 * Permanently fail a test,
+	 * preventing `done` from firing.
+	 **/
+	fail: function (e) {
+		e = typeof e === 'object' ? e : new Error(e);
+		e.message = e.message || 'No error message.';
+
+		return this._terminate(e);
+	},
+
+	/*
+	 * End the test, and set `error`
+	 * if there is one.
+	 **/
+	_terminate: function (error) {
+		if (this._.test.ended) {
+			return this;
+		}
+		this._.test.ended = true;
+
+		panic.connection.emit('event', 'done', {
+			testID: this._.test.ID,
+			clientID: panic.clientID,
+			error: error && {
+				message: error.message,
+				stack: error.stack
+			}
+		});
+
+		console.log('Test finished.');
+
+		return this;
+	}
 };
 
 module.exports = Context;
