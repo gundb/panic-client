@@ -9,6 +9,7 @@
     "socket.io-client": "^1.4.5"
   },
   "devDependencies": {
+    "jasmine": "^2.4.1",
     "webpack": "^1.12.14"
   },
   "scripts": {
