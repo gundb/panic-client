@@ -56,12 +56,13 @@ Context.prototype = {
 			testID: this._.test.ID,
 			clientID: panic.clientID,
 			error: error && {
-				message: error.message,
-				stack: error.stack
+				message: error.message
 			}
 		});
 
 		console.log('Test finished.');
+
+		panic.emit('done');
 
 		return this;
 	}

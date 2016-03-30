@@ -1,19 +1,28 @@
 /*jslint node: true, evil: true*/
 'use strict';
 
+/*
+ * Parses out functions from
+ * strings. Used to parse
+ * Test Description Objects.
+ **/
 Function.parse = function (string) {
 	var val;
 	eval('val = ' + string);
 	return val;
 };
 
-var space = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-space += 'abcdefghijklmnopqrstuvwxyz';
-space += '1234567890';
-
-// produce a random string
+/*
+ * Produces a random string.
+ * Symbol space is enclosed
+ * to protect against "eval"
+ * scope bleed.
+ **/
 String.random = function (length) {
-	var string = '';
+	var string, space = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+	space += (space.toLowerCase() + '1234567890');
+
+	string = '';
 	length = length || 24;
 	if (length < 0) {
 		return '';

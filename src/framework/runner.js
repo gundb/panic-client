@@ -25,10 +25,9 @@ module.exports = runner;
 panic.on('test', function (TDO) {
 	tests[TDO.ID] = TDO;
 	var listeners = panic.listenerCount('test');
-	console.log(TDO);
 
-	if (listeners === 1) {
-		panic.connection.emit('ready', TDO.ID);
+	if (listeners === 1 && TDO.config.cbs.length) {
+		panic.emit('ready', TDO.ID);
 	}
 });
 
