@@ -10,6 +10,12 @@ var panic, tests = {};
 
 function connect(url) {
 	var socket = io.connect(url);
+
+	// reset the connection, restart tests
+	socket.on('disconnect', function () {
+		socket.close();
+		panic.server(url);
+	});
 	panic.connection = socket;
 
 	socket.emit('details', panic.clientID, platform);
