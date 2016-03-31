@@ -4,57 +4,59 @@
 
 var parse = require('../../src/configuration/parse');
 
-function condition(val) {
-	return {
-		conditional: val,
-		cb: 'function () {}'
-	};
-}
 
 describe('The client callback parser', function () {
-	it('should be a function', function () {
-		expect(parse).toEqual(jasmine.any(Function));
+	var TDO;
+
+	beforeEach(function () {
+		TDO = {
+			ID: 'Test ID',
+			description: 'Just a fake test',
+			config: {
+				env: {},
+				cbs: []
+			}
+		};
 	});
 
-	it('should not throw without input', function () {
-		expect(parse).not.toThrow();
-	});
+	function condition(val) {
+		TDO.config.cbs.push({
+			conditional: val,
+			cb: 'function () {}'
+		});
+	}
 
-	it('should return an array', function () {
-		var output = parse([]);
-		expect(output).toEqual(jasmine.any(Array));
+	it('should return the TDO', function () {
+		var output = parse(TDO);
+		expect(output).toBe(TDO);
 	});
 
 	it('should return an array of callbacks', function () {
-		var output = parse([
-			condition()
-		]);
+		condition(true);
+		var output = parse(TDO).config.cbs;
 		expect(output[0]).toEqual(jasmine.any(Function));
 	});
 
 	it('should filter against the conditional method', function () {
-		var output = parse([
-			condition('function () { return false }')
-		]);
+		condition(false);
+		var output = parse(TDO).config.cbs;
 		expect(output.length).toBe(0);
 	});
 
 	it('should accept expressions as conditionals', function () {
-		var output = parse([
-			condition(false),
-			condition('false'),
-			condition('typeof true === "boolean"')
-		]);
+		condition(false);
+		condition('false');
+		condition('typeof true === "boolean"');
+		var output = parse(TDO).config.cbs;
 		expect(output.length).toBe(1);
 	});
 
 	it('should only return a list of functions', function () {
-		var output = parse([
-			condition(true),
-			condition(false),
-			condition('function () { return true }'),
-			condition(1)
-		]);
+		condition(true);
+		condition(false);
+		condition('function () { return true }');
+		condition(1);
+		var output = parse(TDO).config.cbs;
 		expect(output.length).toBe(3);
 		output.forEach(function (cb) {
 			expect(cb).toEqual(jasmine.any(Function));
@@ -62,9 +64,12 @@ describe('The client callback parser', function () {
 	});
 
 	it('should filter out bad input', function () {
-		var output = parse([{
+		TDO.config.cbs.push({
+			conditional: true,
 			cb: 5
-		}]);
-		expect(output.length).toBe(0);
+		});
+		condition(true);
+		var output = parse(TDO).config.cbs;
+		expect(output.length).toBe(1);
 	});
 });
