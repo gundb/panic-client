@@ -8,7 +8,9 @@ var Context = require('../../src/framework/Context');
 function run() {
 	// turn arguments into an array
 	return runner({
-		cbs: ([]).slice.call(arguments)
+		config: {
+			cbs: ([]).slice.call(arguments)
+		}
 	});
 }
 
@@ -23,14 +25,16 @@ describe('The client test runner', function () {
 
 	it('should expose the "env" in the "this" context', function () {
 		runner({
-			env: {
-				success: true
-			},
-			cbs: [
-				function () {
-					expect(this.env.success).toBe(true);
-				}
-			]
+			config: {
+				env: {
+					success: true
+				},
+				cbs: [
+					function () {
+						expect(this.env.success).toBe(true);
+					}
+				]
+			}
 		});
 	});
 
