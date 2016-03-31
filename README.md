@@ -46,3 +46,14 @@ panic.server('http://localhost:8080')
 ```
 
 The tests should begin automatically.
+
+
+## Reference
+
+- TDO - Test Description Object
+  - Description
+  - Id
+  - Configuration object
+    - an environment object
+    - callbacks and conditionals
+

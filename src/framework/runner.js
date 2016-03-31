@@ -1,11 +1,11 @@
 /*jslint node: true*/
 'use strict';
 
-var Context = require('./Context');
 var panic = require('./panic');
 var tests = {};
 
 function runner(test) {
+	var Context = require('./Context');
 	if (!test) {
 		return;
 	}
