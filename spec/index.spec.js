@@ -14,8 +14,8 @@ describe('The panic interface', function () {
 		expect(panic).toEqual(jasmine.any(Object));
 	});
 
-	it('should have a "connect" property', function () {
-		expect(panic.connect).toEqual(jasmine.any(Function));
+	it('should have a "server" property', function () {
+		expect(panic.server).toEqual(jasmine.any(Function));
 	});
 
 	it('should export onto "window" if it exists', function () {
@@ -35,10 +35,10 @@ describe('The panic interface', function () {
 		expect(panic.connection).toBe(null);
 	});
 
-	it('should set the socket after calling "connect"', function () {
-		var obj = { on: function () {} };
+	it('should set the socket after calling "server"', function () {
+		var obj = { on: function () {}, emit: function () {} };
 		spyOn(io, 'connect').and.returnValue(obj);
-		panic.connect(url);
+		panic.server(url);
 		expect(panic.connection).toBe(obj);
 	});
 
@@ -49,65 +49,32 @@ describe('The panic interface', function () {
 		});
 
 		it('should call io.connect()', function () {
-			panic.connect(url);
+			panic.server(url);
 			expect(io.connect).toHaveBeenCalled();
 		});
 
 		it('should pass arg0 to io.connect', function () {
-			panic.connect(url);
+			panic.server(url);
 			expect(io.connect).toHaveBeenCalledWith(url);
 		});
 
 		it('should return the socket', function () {
-			var result = panic.connect(url);
+			var result = panic.server(url);
 			expect(result).toBe(panic.connection);
 		});
 	});
 
 	it('should expose an Emitter instance', function () {
-		expect(panic.events).toEqual(jasmine.any(Emitter));
+		expect(panic).toEqual(jasmine.any(Emitter));
 	});
 
 	it('should listen for test objects', function () {
-		var length = panic.connect(url).listeners('test').length;
+		var length = panic.server(url).listeners('test').length;
 		expect(length).toBeGreaterThan(0);
 	});
 
 	it('should listen for run events', function () {
-		var length = panic.connect(url).listeners('run').length;
+		var length = panic.server(url).listeners('run').length;
 		expect(length).toBeGreaterThan(0);
-	});
-
-	it('should emit "test" on when a TDO comes in', function (done) {
-		var cb = panic.connect(url).listeners('test')[0];
-		panic.events.on('test', done);
-		cb({});
-	});
-
-	it('should emit "run" on run command', function (done) {
-		var cb = panic.connect(url).listeners('run')[0];
-		panic.events.on('run', done);
-		cb({});
-	});
-
-	it('should pass the TDO to the callbacks', function () {
-		var TDO, cb;
-		cb = panic.connect(url).listeners('test')[0];
-		panic.events.on('test', function test(param) {
-			expect(param).toBe(TDO);
-			panic.events.removeListener('test', test);
-		});
-		cb(TDO = {});
-	});
-
-	it('should parse the TDO on "test" event', function () {
-		var cb = panic.connect(url).listeners('test')[0];
-		panic.events.on('test', function test(TDO) {
-			expect(TDO.cbs[0]).toEqual(jasmine.any(Function));
-			panic.events.removeListener('test', test);
-		});
-		cb({
-			cbs: [{ cb: function () {} }]
-		});
 	});
 });
