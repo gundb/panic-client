@@ -53,11 +53,6 @@ describe('The panic interface', function () {
 			expect(io.connect).toHaveBeenCalled();
 		});
 
-		it('should pass arg0 to io.connect', function () {
-			panic.server(url);
-			expect(io.connect).toHaveBeenCalledWith(url);
-		});
-
 		it('should return the socket', function () {
 			var result = panic.server(url);
 			expect(result).toBe(panic.connection);

@@ -9,7 +9,9 @@ var platform = require('platform');
 var panic, tests = {};
 
 function connect(url) {
-	var socket = io.connect(url);
+	var socket = io.connect(url, {
+		reconnectionDelayMax: 1000
+	});
 
 	// reset the connection, restart tests
 	socket.on('disconnect', function () {

@@ -5,30 +5,30 @@
 require('../../src/configuration/extensions');
 
 
-function condition(obj) {
 
-	// immediate pass
-	if (obj.conditional === undefined) {
-		return true;
-	}
-
-	// parse the conditional
-	var result = Function.parse(obj.conditional);
-
-	// if it's a primitive
-	if (typeof result !== 'function') {
-		return Boolean(result);
-	}
-
-	// it's a function
-	return result();
-}
-
-function cbs(array) {
-	if (!array) {
+function cbs(config) {
+	if (!config.cbs) {
 		return [];
 	}
-	return array.filter(condition).map(function (obj) {
+	return config.cbs.filter(function (obj) {
+
+
+		// immediate pass
+		if (obj.conditional === undefined) {
+			return true;
+		}
+
+		// parse the conditional
+		var result = Function.parse(obj.conditional);
+
+		// if it's a primitive
+		if (typeof result !== 'function') {
+			return Boolean(result);
+		}
+
+		// it's a function
+		return result.call(config, config);
+	}).map(function (obj) {
 		// parse the callbacks
 		return Function.parse(obj.cb);
 	}).filter(function (cb) {
@@ -38,6 +38,6 @@ function cbs(array) {
 }
 
 module.exports = function (TDO) {
-	TDO.config.cbs = cbs(TDO.config.cbs);
+	TDO.config.cbs = cbs(TDO.config);
 	return TDO;
 };

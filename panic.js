@@ -71,7 +71,15 @@
 	var panic, tests = {};
 
 	function connect(url) {
-		var socket = io.connect(url);
+		var socket = io.connect(url, {
+			reconnectionDelayMax: 1000
+		});
+
+		// reset the connection, restart tests
+		socket.on('disconnect', function () {
+			socket.close();
+			panic.server(url);
+		});
 		panic.connection = socket;
 
 		socket.emit('details', panic.clientID, platform);
@@ -108,7 +116,7 @@
 /* 2 */
 /***/ function(module, exports, __webpack_require__) {
 
-
+	
 	/**
 	 * Module dependencies.
 	 */
@@ -334,7 +342,7 @@
 /* 5 */
 /***/ function(module, exports, __webpack_require__) {
 
-
+	
 	/**
 	 * This is the web browser implementation of `debug()`.
 	 *
@@ -508,7 +516,7 @@
 /* 6 */
 /***/ function(module, exports, __webpack_require__) {
 
-
+	
 	/**
 	 * This is the common logic for both the Node.js and web browser
 	 * implementations of `debug()`.
@@ -842,7 +850,7 @@
 /* 8 */
 /***/ function(module, exports, __webpack_require__) {
 
-
+	
 	/**
 	 * Module dependencies.
 	 */
@@ -2190,7 +2198,7 @@
 /* 13 */
 /***/ function(module, exports) {
 
-
+	
 	/**
 	 * Expose `Emitter`.
 	 */
@@ -2528,7 +2536,7 @@
 /* 16 */
 /***/ function(module, exports, __webpack_require__) {
 
-
+	
 	/**
 	 * Module dependencies.
 	 */
@@ -3091,7 +3099,7 @@
 /* 17 */
 /***/ function(module, exports, __webpack_require__) {
 
-
+	
 	module.exports =  __webpack_require__(18);
 
 
@@ -3099,7 +3107,7 @@
 /* 18 */
 /***/ function(module, exports, __webpack_require__) {
 
-
+	
 	module.exports = __webpack_require__(19);
 
 	/**
@@ -3952,7 +3960,7 @@
 /* 22 */
 /***/ function(module, exports) {
 
-
+	
 	/**
 	 * Module exports.
 	 *
@@ -5409,7 +5417,7 @@
 /* 27 */
 /***/ function(module, exports) {
 
-
+	
 	/**
 	 * Gets the keys for an object.
 	 *
@@ -5985,7 +5993,7 @@
 /* 34 */
 /***/ function(module, exports) {
 
-
+	
 	/**
 	 * Expose `Emitter`.
 	 */
@@ -6198,7 +6206,7 @@
 /* 36 */
 /***/ function(module, exports) {
 
-
+	
 	module.exports = function(a, b){
 	  var fn = function(){};
 	  fn.prototype = b.prototype;
@@ -6427,7 +6435,7 @@
 	  this.script = script;
 
 	  var isUAgecko = 'undefined' != typeof navigator && /gecko/i.test(navigator.userAgent);
-
+	  
 	  if (isUAgecko) {
 	    setTimeout(function () {
 	      var iframe = document.createElement('iframe');
@@ -6830,7 +6838,7 @@
 /* 41 */
 /***/ function(module, exports) {
 
-
+	
 	var indexOf = [].indexOf;
 
 	module.exports = function(arr, obj){
@@ -6883,7 +6891,7 @@
 /* 43 */
 /***/ function(module, exports, __webpack_require__) {
 
-
+	
 	/**
 	 * Module dependencies.
 	 */
@@ -7301,7 +7309,7 @@
 /* 44 */
 /***/ function(module, exports) {
 
-
+	
 	/**
 	 * Expose `Emitter`.
 	 */
@@ -7487,7 +7495,7 @@
 /* 46 */
 /***/ function(module, exports) {
 
-
+	
 	/**
 	 * Module exports.
 	 */
@@ -7612,7 +7620,7 @@
 /* 49 */
 /***/ function(module, exports) {
 
-
+	
 	/**
 	 * Expose `Backoff`.
 	 */
@@ -10770,11 +10778,11 @@
 	/*jslint node: true*/
 	'use strict';
 
-	var Context = __webpack_require__(58);
 	var panic = __webpack_require__(1);
 	var tests = {};
 
 	function runner(test) {
+		var Context = __webpack_require__(58);
 		if (!test) {
 			return;
 		}
