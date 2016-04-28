@@ -56,4 +56,3 @@ The tests should begin automatically.
   - Configuration object
     - an environment object
     - callbacks and conditionals
-

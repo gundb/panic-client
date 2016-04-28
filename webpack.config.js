@@ -1,4 +1,4 @@
-/*jslint node: true, nomen: true*/
+'use strict';
 var path = require('path');
 
 module.exports = {

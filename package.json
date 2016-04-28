@@ -1,6 +1,6 @@
 {
   "name": "panic-client",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Test client for panic-server",
   "main": "src/index.js",
   "dependencies": {
@@ -9,11 +9,12 @@
     "socket.io-client": "^1.4.5"
   },
   "devDependencies": {
-    "jasmine": "^2.4.1",
+    "chai": "^3.5.0",
+    "mocha": "^2.4.5",
     "webpack": "^1.12.14"
   },
   "scripts": {
-    "test": "jasmine",
+    "test": "mocha",
     "build": "webpack --watch"
   },
   "repository": {

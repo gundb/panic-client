@@ -47,7 +47,7 @@
 	/*jslint node: true*/
 	'use strict';
 
-	var panic = __webpack_require__(1);
+	var panic = __webpack_require__(60);
 
 	if (typeof window !== 'undefined') {
 		window.panic = panic;
@@ -57,62 +57,7 @@
 
 
 /***/ },
-/* 1 */
-/***/ function(module, exports, __webpack_require__) {
-
-	/*jslint node: true*/
-	'use strict';
-
-	var io = __webpack_require__(2);
-	var Emitter = __webpack_require__(50);
-	var parse = __webpack_require__(51);
-	var assign = __webpack_require__(53);
-	var platform = __webpack_require__(56);
-	var panic, tests = {};
-
-	function connect(url) {
-		var socket = io.connect(url, {
-			reconnectionDelayMax: 1000
-		});
-
-		// reset the connection, restart tests
-		socket.on('disconnect', function () {
-			socket.close();
-			panic.server(url);
-		});
-		panic.connection = socket;
-
-		socket.emit('details', panic.clientID, platform);
-
-		socket.on('test', function (TDO) {
-			parse(TDO);
-			tests[TDO.ID] = TDO;
-			panic.emit('test', TDO);
-		});
-
-		socket.on('run', function (ID) {
-			panic.emit('run', ID);
-		});
-
-		return socket;
-	}
-
-	panic = module.exports = new Emitter();
-	assign(module.exports, {
-		server: connect,
-		connection: null,
-		clientID: String.random(10),
-		platform: platform
-	});
-
-	panic.on('ready', function (ID) {
-		panic.connection.emit('ready', ID, platform);
-	});
-
-	__webpack_require__(57);
-
-
-/***/ },
+/* 1 */,
 /* 2 */
 /***/ function(module, exports, __webpack_require__) {
 
@@ -7708,419 +7653,9 @@
 
 
 /***/ },
-/* 50 */
-/***/ function(module, exports) {
-
-	// Copyright Joyent, Inc. and other Node contributors.
-	//
-	// Permission is hereby granted, free of charge, to any person obtaining a
-	// copy of this software and associated documentation files (the
-	// "Software"), to deal in the Software without restriction, including
-	// without limitation the rights to use, copy, modify, merge, publish,
-	// distribute, sublicense, and/or sell copies of the Software, and to permit
-	// persons to whom the Software is furnished to do so, subject to the
-	// following conditions:
-	//
-	// The above copyright notice and this permission notice shall be included
-	// in all copies or substantial portions of the Software.
-	//
-	// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-	// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-	// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
-	// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-	// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
-	// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
-	// USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-	function EventEmitter() {
-	  this._events = this._events || {};
-	  this._maxListeners = this._maxListeners || undefined;
-	}
-	module.exports = EventEmitter;
-
-	// Backwards-compat with node 0.10.x
-	EventEmitter.EventEmitter = EventEmitter;
-
-	EventEmitter.prototype._events = undefined;
-	EventEmitter.prototype._maxListeners = undefined;
-
-	// By default EventEmitters will print a warning if more than 10 listeners are
-	// added to it. This is a useful default which helps finding memory leaks.
-	EventEmitter.defaultMaxListeners = 10;
-
-	// Obviously not all Emitters should be limited to 10. This function allows
-	// that to be increased. Set to zero for unlimited.
-	EventEmitter.prototype.setMaxListeners = function(n) {
-	  if (!isNumber(n) || n < 0 || isNaN(n))
-	    throw TypeError('n must be a positive number');
-	  this._maxListeners = n;
-	  return this;
-	};
-
-	EventEmitter.prototype.emit = function(type) {
-	  var er, handler, len, args, i, listeners;
-
-	  if (!this._events)
-	    this._events = {};
-
-	  // If there is no 'error' event listener then throw.
-	  if (type === 'error') {
-	    if (!this._events.error ||
-	        (isObject(this._events.error) && !this._events.error.length)) {
-	      er = arguments[1];
-	      if (er instanceof Error) {
-	        throw er; // Unhandled 'error' event
-	      }
-	      throw TypeError('Uncaught, unspecified "error" event.');
-	    }
-	  }
-
-	  handler = this._events[type];
-
-	  if (isUndefined(handler))
-	    return false;
-
-	  if (isFunction(handler)) {
-	    switch (arguments.length) {
-	      // fast cases
-	      case 1:
-	        handler.call(this);
-	        break;
-	      case 2:
-	        handler.call(this, arguments[1]);
-	        break;
-	      case 3:
-	        handler.call(this, arguments[1], arguments[2]);
-	        break;
-	      // slower
-	      default:
-	        args = Array.prototype.slice.call(arguments, 1);
-	        handler.apply(this, args);
-	    }
-	  } else if (isObject(handler)) {
-	    args = Array.prototype.slice.call(arguments, 1);
-	    listeners = handler.slice();
-	    len = listeners.length;
-	    for (i = 0; i < len; i++)
-	      listeners[i].apply(this, args);
-	  }
-
-	  return true;
-	};
-
-	EventEmitter.prototype.addListener = function(type, listener) {
-	  var m;
-
-	  if (!isFunction(listener))
-	    throw TypeError('listener must be a function');
-
-	  if (!this._events)
-	    this._events = {};
-
-	  // To avoid recursion in the case that type === "newListener"! Before
-	  // adding it to the listeners, first emit "newListener".
-	  if (this._events.newListener)
-	    this.emit('newListener', type,
-	              isFunction(listener.listener) ?
-	              listener.listener : listener);
-
-	  if (!this._events[type])
-	    // Optimize the case of one listener. Don't need the extra array object.
-	    this._events[type] = listener;
-	  else if (isObject(this._events[type]))
-	    // If we've already got an array, just append.
-	    this._events[type].push(listener);
-	  else
-	    // Adding the second element, need to change to array.
-	    this._events[type] = [this._events[type], listener];
-
-	  // Check for listener leak
-	  if (isObject(this._events[type]) && !this._events[type].warned) {
-	    if (!isUndefined(this._maxListeners)) {
-	      m = this._maxListeners;
-	    } else {
-	      m = EventEmitter.defaultMaxListeners;
-	    }
-
-	    if (m && m > 0 && this._events[type].length > m) {
-	      this._events[type].warned = true;
-	      console.error('(node) warning: possible EventEmitter memory ' +
-	                    'leak detected. %d listeners added. ' +
-	                    'Use emitter.setMaxListeners() to increase limit.',
-	                    this._events[type].length);
-	      if (typeof console.trace === 'function') {
-	        // not supported in IE 10
-	        console.trace();
-	      }
-	    }
-	  }
-
-	  return this;
-	};
-
-	EventEmitter.prototype.on = EventEmitter.prototype.addListener;
-
-	EventEmitter.prototype.once = function(type, listener) {
-	  if (!isFunction(listener))
-	    throw TypeError('listener must be a function');
-
-	  var fired = false;
-
-	  function g() {
-	    this.removeListener(type, g);
-
-	    if (!fired) {
-	      fired = true;
-	      listener.apply(this, arguments);
-	    }
-	  }
-
-	  g.listener = listener;
-	  this.on(type, g);
-
-	  return this;
-	};
-
-	// emits a 'removeListener' event iff the listener was removed
-	EventEmitter.prototype.removeListener = function(type, listener) {
-	  var list, position, length, i;
-
-	  if (!isFunction(listener))
-	    throw TypeError('listener must be a function');
-
-	  if (!this._events || !this._events[type])
-	    return this;
-
-	  list = this._events[type];
-	  length = list.length;
-	  position = -1;
-
-	  if (list === listener ||
-	      (isFunction(list.listener) && list.listener === listener)) {
-	    delete this._events[type];
-	    if (this._events.removeListener)
-	      this.emit('removeListener', type, listener);
-
-	  } else if (isObject(list)) {
-	    for (i = length; i-- > 0;) {
-	      if (list[i] === listener ||
-	          (list[i].listener && list[i].listener === listener)) {
-	        position = i;
-	        break;
-	      }
-	    }
-
-	    if (position < 0)
-	      return this;
-
-	    if (list.length === 1) {
-	      list.length = 0;
-	      delete this._events[type];
-	    } else {
-	      list.splice(position, 1);
-	    }
-
-	    if (this._events.removeListener)
-	      this.emit('removeListener', type, listener);
-	  }
-
-	  return this;
-	};
-
-	EventEmitter.prototype.removeAllListeners = function(type) {
-	  var key, listeners;
-
-	  if (!this._events)
-	    return this;
-
-	  // not listening for removeListener, no need to emit
-	  if (!this._events.removeListener) {
-	    if (arguments.length === 0)
-	      this._events = {};
-	    else if (this._events[type])
-	      delete this._events[type];
-	    return this;
-	  }
-
-	  // emit removeListener for all listeners on all events
-	  if (arguments.length === 0) {
-	    for (key in this._events) {
-	      if (key === 'removeListener') continue;
-	      this.removeAllListeners(key);
-	    }
-	    this.removeAllListeners('removeListener');
-	    this._events = {};
-	    return this;
-	  }
-
-	  listeners = this._events[type];
-
-	  if (isFunction(listeners)) {
-	    this.removeListener(type, listeners);
-	  } else if (listeners) {
-	    // LIFO order
-	    while (listeners.length)
-	      this.removeListener(type, listeners[listeners.length - 1]);
-	  }
-	  delete this._events[type];
-
-	  return this;
-	};
-
-	EventEmitter.prototype.listeners = function(type) {
-	  var ret;
-	  if (!this._events || !this._events[type])
-	    ret = [];
-	  else if (isFunction(this._events[type]))
-	    ret = [this._events[type]];
-	  else
-	    ret = this._events[type].slice();
-	  return ret;
-	};
-
-	EventEmitter.prototype.listenerCount = function(type) {
-	  if (this._events) {
-	    var evlistener = this._events[type];
-
-	    if (isFunction(evlistener))
-	      return 1;
-	    else if (evlistener)
-	      return evlistener.length;
-	  }
-	  return 0;
-	};
-
-	EventEmitter.listenerCount = function(emitter, type) {
-	  return emitter.listenerCount(type);
-	};
-
-	function isFunction(arg) {
-	  return typeof arg === 'function';
-	}
-
-	function isNumber(arg) {
-	  return typeof arg === 'number';
-	}
-
-	function isObject(arg) {
-	  return typeof arg === 'object' && arg !== null;
-	}
-
-	function isUndefined(arg) {
-	  return arg === void 0;
-	}
-
-
-/***/ },
-/* 51 */
-/***/ function(module, exports, __webpack_require__) {
-
-	/*jslint node: true*/
-	'use strict';
-
-	// provides `Function.parse`
-	__webpack_require__(52);
-
-
-	function condition(obj) {
-
-
-		// immediate pass
-		if (obj.conditional === undefined) {
-			return true;
-		}
-
-		// parse the conditional
-		var result = Function.parse(obj.conditional);
-
-		// if it's a primitive
-		if (typeof result !== 'function') {
-			return Boolean(result);
-		}
-
-		// it's a function
-		console.log(obj.conditional, obj);
-		return result.call(obj.config, obj.config);
-	}
-
-	function cbs(config) {
-		if (!config.cbs) {
-			return [];
-		}
-		return config.cbs.filter(function condition(obj) {
-
-
-			// immediate pass
-			if (obj.conditional === undefined) {
-				return true;
-			}
-
-			// parse the conditional
-			var result = Function.parse(obj.conditional);
-
-			// if it's a primitive
-			if (typeof result !== 'function') {
-				return Boolean(result);
-			}
-
-			// it's a function
-			return result.call(config, config);
-		}).map(function (obj) {
-			// parse the callbacks
-			return Function.parse(obj.cb);
-		}).filter(function (cb) {
-			// filter out non-functions
-			return typeof cb === 'function';
-		});
-	}
-
-	module.exports = function (TDO) {
-		TDO.config.cbs = cbs(TDO.config);
-		return TDO;
-	};
-
-/***/ },
-/* 52 */
-/***/ function(module, exports) {
-
-	/*jslint node: true, evil: true*/
-	'use strict';
-
-	/*
-	 * Parses out functions from
-	 * strings. Used to parse
-	 * Test Description Objects.
-	 **/
-	Function.parse = function (string) {
-		var val;
-		eval('val = ' + string);
-		return val;
-	};
-
-	/*
-	 * Produces a random string.
-	 * Symbol space is enclosed
-	 * to protect against "eval"
-	 * scope bleed.
-	 **/
-	String.random = function (length) {
-		var string, space = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-		space += (space.toLowerCase() + '1234567890');
-
-		string = '';
-		length = length || 24;
-		if (length < 0) {
-			return '';
-		}
-		while (length) {
-			string += space[Math.floor(Math.random() * space.length)];
-			length -= 1;
-		}
-		return string;
-	};
-
-
-/***/ },
+/* 50 */,
+/* 51 */,
+/* 52 */,
 /* 53 */
 /***/ function(module, exports, __webpack_require__) {
 
@@ -10772,75 +10307,106 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(10)(module), (function() { return this; }())))
 
 /***/ },
-/* 57 */
+/* 57 */,
+/* 58 */,
+/* 59 */,
+/* 60 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/*jslint node: true*/
 	'use strict';
 
-	var panic = __webpack_require__(1);
-	var tests = {};
+	var io = __webpack_require__(2);
+	var assign = __webpack_require__(53);
+	var platform = __webpack_require__(56);
+	var Job, panic;
 
-	function runner(test) {
-		var Context = __webpack_require__(58);
-		if (!test) {
-			return;
-		}
-		var ctx = new Context(test);
+	function connect(url) {
+		var socket = panic.connection = io.connect(url);
 
-		test.config.cbs.forEach(function (cb) {
-			try {
-				cb.call(ctx, ctx, ctx.done);
-			} catch (e) {
-				ctx.fail(e);
-			}
+		// reset the connection
+		socket.on('disconnect', function () {
+			socket.close();
+			panic.server(url);
 		});
+
+		socket.emit('handshake', platform);
+
+		socket.on('data', function (name, obj) {
+			var data = Job.prototype.data;
+			data[name] = data[name] || {};
+			assign(data[name], obj || {});
+		});
+
+		socket.on('run', Job);
+
+		return socket;
 	}
 
-	module.exports = runner;
+	panic = module.exports = {
+		server: connect,
+		connection: null,
+		platform: platform
+	};
 
-	panic.on('test', function (TDO) {
-		tests[TDO.ID] = TDO;
-		var listeners = panic.listenerCount('test');
-
-		if (listeners === 1 && TDO.config.cbs.length) {
-			panic.emit('ready', TDO.ID);
-		}
-	});
-
-	panic.on('run', function (ID) {
-		console.log('Running test "' + tests[ID].description + '"');
-		runner(tests[ID]);
-	});
+	Job = __webpack_require__(61);
 
 
 /***/ },
-/* 58 */
+/* 61 */
 /***/ function(module, exports, __webpack_require__) {
 
-	/*jslint node: true, nomen: true*/
+	/*eslint "no-eval": "off", "id-length": "off"*/
 	'use strict';
+	var panic = __webpack_require__(60);
 
-	var assign = __webpack_require__(53);
-	var panic = __webpack_require__(1);
-
-	function Context(test) {
-		this._ = {
-			test: test
+	Error.prototype.toJSON = function () {
+		return {
+			message: this.message,
+			source: this.source || null,
+			platform: panic.platform
 		};
-		this.env = {};
+	};
 
-		assign(this.env, test.config.env);
+	function Job(raw, id) {
+		if (!(this instanceof Job)) {
+			return new Job(raw, id);
+		}
+		this._ = {
+			raw: raw,
+			id: id
+		};
+
+		var cb = eval('(' + raw + ')');
 
 		this.done = this.done.bind(this);
 		this.fail = this.fail.bind(this);
+
+		try {
+			if (cb.length > 1) {
+				cb.call(this, this, this.done);
+			} else {
+				cb.call(this, this);
+				this.done();
+			}
+		} catch (err) {
+			this.fail(err);
+		}
 	}
 
-	Context.prototype = {
-		constructor: Context,
+	Job.prototype = {
+		constructor: Job,
+
+		data: {},
 
 		// default timeout
-		timeout: false,
+		timeout: function (time) {
+			var job = this;
+			setTimeout(function () {
+				job.fail('Timeout reached: ' + time + 'ms');
+			}, time);
+			return job;
+		},
 
 		/*
 		 * Mark a test as finished.
@@ -10855,40 +10421,33 @@
 		 * Permanently fail a test,
 		 * preventing `done` from firing.
 		 **/
-		fail: function (e) {
-			e = typeof e === 'object' ? e : new Error(e);
-			e.message = e.message || 'No error message.';
+		fail: function (err) {
+			err = err instanceof Object ? err : new Error(err);
+			err.message = err.message || 'No error message.';
+			err.source = err.source || this.toSource();
 
-			return this._terminate(e);
+			return this._terminate(err);
 		},
 
 		/*
-		 * End the test, and set `error`
-		 * if there is one.
+		 * End the test
 		 **/
 		_terminate: function (error) {
-			if (this._.test.ended) {
+			if (this._.ended) {
 				return this;
 			}
-			this._.test.ended = true;
-
-			panic.connection.emit('event', 'done', {
-				testID: this._.test.ID,
-				clientID: panic.clientID,
-				error: error && {
-					message: error.message
-				}
-			});
-
-			console.log('Test finished.');
-
-			panic.emit('done');
+			this._.ended = true;
+			panic.connection.emit(this._.id, error);
 
 			return this;
+		},
+
+		toSource: function () {
+			return this._.raw;
 		}
 	};
 
-	module.exports = Context;
+	module.exports = Job;
 
 
 /***/ }
