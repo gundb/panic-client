@@ -1,37 +1,20 @@
-/*jslint node: true*/
 'use strict';
 
 var io = require('socket.io-client');
-var assign = require('object-assign-deep');
 var platform = require('platform');
 var Job, panic;
 
-function connect(url) {
+function server(url) {
 	var socket = panic.connection = io.connect(url);
-
 	Job.prototype.socket = socket;
 
-	// reset the connection
-	socket.on('disconnect', function () {
-		socket.close();
-		panic.server(url);
-	});
-
-	socket.emit('handshake', platform);
-
-	socket.on('data', function (name, obj) {
-		var data = Job.prototype.data;
-		data[name] = data[name] || {};
-		assign(data[name], obj || {});
-	});
-
-	socket.on('run', Job);
+	socket.on('run', Job).emit('handshake', platform);
 
 	return socket;
 }
 
 panic = module.exports = {
-	server: connect,
+	server: server,
 	connection: null,
 	platform: platform
 };

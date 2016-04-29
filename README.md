@@ -1,58 +1,64 @@
 Panic Client
 ------------
+*Lightweight client for panic-server*
 
-> This is meant to be used alongside [panic-server](https://github.com/gundb/panic-server).
+## Docs
+Since this library is just support for [panic-server](https://github.com/gundb/panic-server), you can find the majority of the documentation [over there](https://github.com/gundb/panic-server/blob/master/README.md).
 
-## What it is
-Panic is a distributed test framework built for [gunDB](https://github.com/amark/gun) to test end-to-end functionality, such as client/client interactions. Other E2E test frameworks focus more on a single browser. While valuable, collaborative apps are nearly impossible to test. For example:
-
-```
-browsers A and B connect to server C
-browser A performs action and is done
-server C sees action and is done
-browser B sees action and is done
-
-3 cases finished, no failures. Next test.
-```
-
-So while many test frameworks will focus on one of those peers, no test framework includes them all. This is a true end-to-end framework, and without it, real-time data sync has been a nightmare to test against.
-
-## Usage
-
-> **Warning:** panic is still under development.
-
-Download [panic-server](https://github.com/PsychoLlama/panic-server.git), that's where the tests are written. To connect to the panic dispatcher, first include the panic src:
+## Installing
+Panic-client is hosted on [npm](https://www.npmjs.com/package/panic-client), and can be installed by running this in your terminal:
 
 ```bash
-npm install PsychoLlama/panic-client
+npm install panic-client
 ```
 
-**Browser:**
+> If you're not familiar with npm, you can learn more by [clicking here](https://docs.npmjs.com/getting-started/what-is-npm), or you can install it by following [these instructions](http://blog.npmjs.org/post/85484771375/how-to-install-npm).
+
+## Usage
+Panic-client's API surface area is pretty small, since it's just a small wrapper around [socket.io](http://socket.io/). It consists of one method, `server`, and two properties, `connection` and `platform`.
+
+There are two ways to include it in your code, depending on your environment...
+
+**Node.js**
+```javascript
+// simply import it.
+var panic = require('panic-client')
+```
+
+**Browser**
+
+> If you're using [panic-server](https://github.com/gundb/panic-server), the server automatically delivers the browser file at the at the port/hostname you configured. By default, it will be 'http://localhost:8080/panic.js'.
+
+If you're not using [panic-server](https://github.com/gundb/panic-server), it may be more complicated, depending on your file structure. If you're using [webpack](https://github.com/webpack/webpack), simply include it the same way as you would on Node.js. Otherwise, the browser build is located at root level, named `panic.js`. Simply point a script tag there, or copy it into your project root...
+
 ```html
-<script src="panic.js"></script>
-<!-- this will expose the "panic" global -->
-
-```
-**Node.js:**
-```javascript
-var panic = require('panic-client');
+<script src="node_modules/{path to panic-client}/panic.js"></script>
+<script>
+	panic; // now exposed as a global variable
+</script>
 ```
 
-Now all that's left is connecting to the panic server:
+Best practice is to load through panic-server.
+
+```html
+<script src="http://localhost:8080/panic.js"></script>
+```
+
+### `.server(String)`
+This method attempts to connect to your panic-server host, and allows panic-server to run code on your machine in real-time. Just give it the url.
 
 ```javascript
-// panic will default to this address
+// This is the default url.
+// When connecting from another computer,
+// exchange `localhost` with your ip address.
 panic.server('http://localhost:8080')
 ```
 
-The tests should begin automatically.
+### `.connection`
+`panic.connection` is the websocket opened to panic-server. If you haven't called `panic.server()` yet, it'll be `null`.
 
+### `.platform`
+The `panic.platform` object is created by [platform.js](https://github.com/bestiejs/platform.js/), and contains information about what environment the code is running on.
 
-## Reference
-
-- TDO - Test Description Object
-  - Description
-  - Id
-  - Configuration object
-    - an environment object
-    - callbacks and conditionals
+## Support
+If you have questions or ideas, please let us know on [our gitter channel](https://gitter.im/amark/gun) :grinning:
