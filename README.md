@@ -2,6 +2,11 @@ Panic Client
 ------------
 *Lightweight client for panic-server*
 
+[![npm](https://img.shields.io/npm/dt/panic-client.svg?style=flat-square)](https://www.npmjs.com/package/panic-client)
+[![Travis branch](https://img.shields.io/travis/PsychoLlama/panic-client/master.svg?style=flat-square)](https://travis-ci.org/PsychoLlama/panic-client)
+[![Gitter](https://img.shields.io/gitter/room/nwjs/nw.js.svg?style=flat-square)](https://gitter.im/amark/gun)
+[![npm](https://img.shields.io/npm/v/panic-client.svg?style=flat-square)](https://www.npmjs.com/package/panic-client)
+
 ## Docs
 Since this library is just support for [panic-server](https://github.com/gundb/panic-server), you can find the majority of the documentation [over there](https://github.com/gundb/panic-server/blob/master/README.md).
 
