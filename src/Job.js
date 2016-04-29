@@ -1,6 +1,7 @@
 /*eslint "no-eval": "off", "id-length": "off"*/
 'use strict';
 var panic = require('./panic');
+var parse = require('./parser');
 
 Error.prototype.toJSON = function () {
 	return {
@@ -10,16 +11,22 @@ Error.prototype.toJSON = function () {
 	};
 };
 
-function Job(raw, id) {
+function Job(raw, id, scope) {
 	if (!(this instanceof Job)) {
-		return new Job(raw, id);
+		return new Job(raw, id, scope);
 	}
 	this._ = {
 		raw: raw,
 		id: id
 	};
+	this.data = scope || {};
 
-	var cb = eval('(' + raw + ')');
+	var cb;
+	if ((scope || {})['export vars'] === false) {
+		cb = parse(raw, {});
+	} else {
+		cb = parse(raw, this.data);
+	}
 
 	this.done = this.done.bind(this);
 	this.fail = this.fail.bind(this);
@@ -39,7 +46,8 @@ function Job(raw, id) {
 Job.prototype = {
 	constructor: Job,
 
-	data: {},
+	socket: null,
+	data: null,
 
 	// default timeout
 	timeout: function (time) {

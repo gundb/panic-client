@@ -47,7 +47,7 @@
 	/*jslint node: true*/
 	'use strict';
 
-	var panic = __webpack_require__(60);
+	var panic = __webpack_require__(1);
 
 	if (typeof window !== 'undefined') {
 		window.panic = panic;
@@ -57,7 +57,51 @@
 
 
 /***/ },
-/* 1 */,
+/* 1 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/*jslint node: true*/
+	'use strict';
+
+	var io = __webpack_require__(2);
+	var assign = __webpack_require__(50);
+	var platform = __webpack_require__(53);
+	var Job, panic;
+
+	function connect(url) {
+		var socket = panic.connection = io.connect(url);
+
+		Job.prototype.socket = socket;
+
+		// reset the connection
+		socket.on('disconnect', function () {
+			socket.close();
+			panic.server(url);
+		});
+
+		socket.emit('handshake', platform);
+
+		socket.on('data', function (name, obj) {
+			var data = Job.prototype.data;
+			data[name] = data[name] || {};
+			assign(data[name], obj || {});
+		});
+
+		socket.on('run', Job);
+
+		return socket;
+	}
+
+	panic = module.exports = {
+		server: connect,
+		connection: null,
+		platform: platform
+	};
+
+	Job = __webpack_require__(54);
+
+
+/***/ },
 /* 2 */
 /***/ function(module, exports, __webpack_require__) {
 
@@ -7653,18 +7697,15 @@
 
 
 /***/ },
-/* 50 */,
-/* 51 */,
-/* 52 */,
-/* 53 */
+/* 50 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/*
 	 * Object Assign Deep.
 	 */
 
-	var objectAssign = __webpack_require__(54);
-	var _            = __webpack_require__(55);
+	var objectAssign = __webpack_require__(51);
+	var _            = __webpack_require__(52);
 
 	module.exports = function ME (target, source) {
 
@@ -7712,7 +7753,7 @@
 	};
 
 /***/ },
-/* 54 */
+/* 51 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -7744,7 +7785,7 @@
 
 
 /***/ },
-/* 55 */
+/* 52 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;//     Underscore.js 1.7.0
@@ -9165,7 +9206,7 @@
 
 
 /***/ },
-/* 56 */
+/* 53 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_RESULT__;/* WEBPACK VAR INJECTION */(function(module, global) {/*!
@@ -10307,58 +10348,13 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(10)(module), (function() { return this; }())))
 
 /***/ },
-/* 57 */,
-/* 58 */,
-/* 59 */,
-/* 60 */
-/***/ function(module, exports, __webpack_require__) {
-
-	/*jslint node: true*/
-	'use strict';
-
-	var io = __webpack_require__(2);
-	var assign = __webpack_require__(53);
-	var platform = __webpack_require__(56);
-	var Job, panic;
-
-	function connect(url) {
-		var socket = panic.connection = io.connect(url);
-
-		// reset the connection
-		socket.on('disconnect', function () {
-			socket.close();
-			panic.server(url);
-		});
-
-		socket.emit('handshake', platform);
-
-		socket.on('data', function (name, obj) {
-			var data = Job.prototype.data;
-			data[name] = data[name] || {};
-			assign(data[name], obj || {});
-		});
-
-		socket.on('run', Job);
-
-		return socket;
-	}
-
-	panic = module.exports = {
-		server: connect,
-		connection: null,
-		platform: platform
-	};
-
-	Job = __webpack_require__(61);
-
-
-/***/ },
-/* 61 */
+/* 54 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/*eslint "no-eval": "off", "id-length": "off"*/
 	'use strict';
-	var panic = __webpack_require__(60);
+	var panic = __webpack_require__(1);
+	var parse = __webpack_require__(55);
 
 	Error.prototype.toJSON = function () {
 		return {
@@ -10368,16 +10364,22 @@
 		};
 	};
 
-	function Job(raw, id) {
+	function Job(raw, id, scope) {
 		if (!(this instanceof Job)) {
-			return new Job(raw, id);
+			return new Job(raw, id, scope);
 		}
 		this._ = {
 			raw: raw,
 			id: id
 		};
+		this.data = scope || {};
 
-		var cb = eval('(' + raw + ')');
+		var cb;
+		if ((scope || {})['export vars'] === false) {
+			cb = parse(raw, {});
+		} else {
+			cb = parse(raw, this.data);
+		}
 
 		this.done = this.done.bind(this);
 		this.fail = this.fail.bind(this);
@@ -10397,7 +10399,8 @@
 	Job.prototype = {
 		constructor: Job,
 
-		data: {},
+		socket: null,
+		data: null,
 
 		// default timeout
 		timeout: function (time) {
@@ -10448,6 +10451,33 @@
 	};
 
 	module.exports = Job;
+
+
+/***/ },
+/* 55 */
+/***/ function(module, exports) {
+
+	/*eslint "strict": "off", "no-with": "off", "no-eval": "off"*/
+
+	/*
+		This may well be the worst code I've ever written.
+		...
+		but it's really cool.
+
+		It's also the reason you should never use panic
+		in user-facing code.
+
+		The purpose of the parser is to take a stringified
+		function, a scope, and return a function that has
+		locally scoped variables according to the properties
+		in the object (second param).
+	*/
+
+	module.exports = function () {
+		with (arguments[1] || {}) {
+			return eval('(' + arguments[0] + ')');
+		}
+	};
 
 
 /***/ }

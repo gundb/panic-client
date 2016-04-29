@@ -9,6 +9,8 @@ var Job, panic;
 function connect(url) {
 	var socket = panic.connection = io.connect(url);
 
+	Job.prototype.socket = socket;
+
 	// reset the connection
 	socket.on('disconnect', function () {
 		socket.close();
