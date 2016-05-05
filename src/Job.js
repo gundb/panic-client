@@ -48,6 +48,7 @@ Job.prototype = {
 
 	socket: null,
 	data: null,
+	platform: panic.platform,
 
 	// default timeout
 	timeout: function (time) {

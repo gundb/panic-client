@@ -43,4 +43,14 @@ describe('A job', function () {
 			'export vars': false
 		});
 	});
+
+	it('should export the platform', function () {
+		var matches = {};
+		new Job(function () {
+			this.data.matches.platform = this.platform;
+		}, key, {
+			matches: matches
+		});
+		expect(matches.platform).to.be.an.instanceof(Object);
+	});
 });
