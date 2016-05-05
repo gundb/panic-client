@@ -63,7 +63,7 @@
 	'use strict';
 
 	var io = __webpack_require__(2);
-	var platform = __webpack_require__(53);
+	var platform = __webpack_require__(50);
 	var Job, panic;
 
 	function server(url) {
@@ -81,7 +81,7 @@
 		platform: platform
 	};
 
-	Job = __webpack_require__(54);
+	Job = __webpack_require__(51);
 
 
 /***/ },
@@ -7680,10 +7680,7 @@
 
 
 /***/ },
-/* 50 */,
-/* 51 */,
-/* 52 */,
-/* 53 */
+/* 50 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_RESULT__;/* WEBPACK VAR INJECTION */(function(module, global) {/*!
@@ -8825,13 +8822,13 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(10)(module), (function() { return this; }())))
 
 /***/ },
-/* 54 */
+/* 51 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/*eslint "no-eval": "off", "id-length": "off"*/
 	'use strict';
 	var panic = __webpack_require__(1);
-	var parse = __webpack_require__(55);
+	var parse = __webpack_require__(52);
 
 	Error.prototype.toJSON = function () {
 		return {
@@ -8878,6 +8875,7 @@
 
 		socket: null,
 		data: null,
+		platform: panic.platform,
 
 		// default timeout
 		timeout: function (time) {
@@ -8931,7 +8929,7 @@
 
 
 /***/ },
-/* 55 */
+/* 52 */
 /***/ function(module, exports) {
 
 	/*eslint "strict": "off", "no-with": "off", "no-eval": "off"*/
