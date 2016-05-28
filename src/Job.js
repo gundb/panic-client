@@ -3,6 +3,9 @@
 var panic = require('./panic');
 var parse = require('./parser');
 
+// Function.prototype.bind
+require('phantomjs-polyfill');
+
 Error.prototype.toJSON = function () {
 	return {
 		message: this.message,
@@ -10,6 +13,20 @@ Error.prototype.toJSON = function () {
 		platform: panic.platform
 	};
 };
+
+/*
+	Sadly, since IE6 doesn't support
+	Function.prototype.length (or getters),
+	this is a simple "polyfill".
+*/
+function params (raw) {
+	var parens = raw.match(/\((.*?)\)/);
+	var args = parens && parens[1];
+	if (args && args.length) {
+		return args.split(',').length;
+	}
+	return 0;
+}
 
 function Job(raw, id, scope) {
 	if (!(this instanceof Job)) {
@@ -22,20 +39,20 @@ function Job(raw, id, scope) {
 	this.data = scope || {};
 
 	var cb;
-	if ((scope || {})['export vars'] === false) {
-		cb = parse(raw, {});
-	} else {
+	if (this.data['@scope'] === true) {
 		cb = parse(raw, this.data);
+	} else {
+		cb = parse(raw, {});
 	}
 
 	this.done = this.done.bind(this);
 	this.fail = this.fail.bind(this);
 
 	try {
-		if (cb.length > 1) {
-			cb.call(this, this, this.done);
+		if (params(raw) > 0) {
+			cb.call(this, this.done);
 		} else {
-			cb.call(this, this);
+			cb.call(this);
 			this.done();
 		}
 	} catch (err) {

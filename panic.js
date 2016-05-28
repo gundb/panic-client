@@ -8830,6 +8830,9 @@
 	var panic = __webpack_require__(1);
 	var parse = __webpack_require__(52);
 
+	// Function.prototype.bind
+	__webpack_require__(53);
+
 	Error.prototype.toJSON = function () {
 		return {
 			message: this.message,
@@ -8837,6 +8840,20 @@
 			platform: panic.platform
 		};
 	};
+
+	/*
+		Sadly, since IE6 doesn't support
+		Function.prototype.length (or getters),
+		this is a simple "polyfill".
+	*/
+	function params (raw) {
+		var parens = raw.match(/\((.*?)\)/);
+		var args = parens && parens[1];
+		if (args && args.length) {
+			return args.split(',').length;
+		}
+		return 0;
+	}
 
 	function Job(raw, id, scope) {
 		if (!(this instanceof Job)) {
@@ -8849,20 +8866,20 @@
 		this.data = scope || {};
 
 		var cb;
-		if ((scope || {})['export vars'] === false) {
-			cb = parse(raw, {});
-		} else {
+		if (this.data['@scope'] === true) {
 			cb = parse(raw, this.data);
+		} else {
+			cb = parse(raw, {});
 		}
 
 		this.done = this.done.bind(this);
 		this.fail = this.fail.bind(this);
 
 		try {
-			if (cb.length > 1) {
-				cb.call(this, this, this.done);
+			if (params(raw) > 0) {
+				cb.call(this, this.done);
 			} else {
-				cb.call(this, this);
+				cb.call(this);
 				this.done();
 			}
 		} catch (err) {
@@ -8932,7 +8949,7 @@
 /* 52 */
 /***/ function(module, exports) {
 
-	/*eslint "strict": "off", "no-with": "off", "no-eval": "off"*/
+	/*eslint-disable*/
 
 	/*
 		This may well be the worst code I've ever written.
@@ -8948,11 +8965,39 @@
 		in the object (second param).
 	*/
 
+	// polyfill `arguments` for IE6
 	module.exports = function () {
+		var arguments = module.exports.arguments || arguments;
+		var PANIC_CB_FUNCTION;
 		with (arguments[1] || {}) {
-			return eval('(' + arguments[0] + ')');
+			eval('PANIC_CB_FUNCTION = ' + arguments[0]);
+			return PANIC_CB_FUNCTION;
 		}
 	};
+
+
+/***/ },
+/* 53 */
+/***/ function(module, exports) {
+
+	if (typeof Function.prototype.bind != 'function') {
+	    Function.prototype.bind = function bind(obj) {
+	        var args = Array.prototype.slice.call(arguments, 1),
+	            self = this,
+	            nop = function() {
+	            },
+	            bound = function() {
+	                return self.apply(
+	                    this instanceof nop ? this : (obj || {}), args.concat(
+	                        Array.prototype.slice.call(arguments)
+	                    )
+	                );
+	            };
+	        nop.prototype = this.prototype || {};
+	        bound.prototype = new nop();
+	        return bound;
+	    };
+	}
 
 
 /***/ }

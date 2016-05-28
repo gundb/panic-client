@@ -1,4 +1,4 @@
-/*eslint "strict": "off", "no-with": "off", "no-eval": "off"*/
+/*eslint-disable*/
 
 /*
 	This may well be the worst code I've ever written.
@@ -14,8 +14,12 @@
 	in the object (second param).
 */
 
+// polyfill `arguments` for IE6
 module.exports = function () {
+	var arguments = module.exports.arguments || arguments;
+	var PANIC_CB_FUNCTION;
 	with (arguments[1] || {}) {
-		return eval('(' + arguments[0] + ')');
+		eval('PANIC_CB_FUNCTION = ' + arguments[0]);
+		return PANIC_CB_FUNCTION;
 	}
 };
