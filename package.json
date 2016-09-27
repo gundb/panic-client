@@ -15,7 +15,9 @@
   },
   "scripts": {
     "test": "mocha",
-    "build": "webpack --watch"
+    "build": "webpack",
+    "dev": "npm run build -- --watch",
+    "prepublish": "npm run build"
   },
   "repository": {
     "type": "git",
