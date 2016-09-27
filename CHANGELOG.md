@@ -1,17 +1,24 @@
 # Changelog
 
-## v0.2.0
-Breaking changes:
- - The `done` callback is now the 1st parameter passed to peers instead of the second.
- - Variable injection no longer happens by default, and the flag has changed to `'@scope'`.
+## Unreleased
+### Added
+- Shared job state with `this.set` and `this.get`.
 
-Improvement: a number of things have changed to allow for IE6 compatibility (polyfill of arguments, function.length, and a function expression fix in `eval`).
+## v0.2.0
+### Changed
+- The `done` callback is now the 1st parameter passed to peers instead of the second.
+- Variable injection no longer happens by default, and the flag has changed to `'@scope'`.
+
+### Added
+- IE6 compatibility by adding polyfills (`arguments`, `function.length`, `eval` variable assignment over function expressions).
 
 ## v0.1.2
-Bug fix: previous version build not updated.
+### Fixed
+- Previous version build not updated.
 
 ## v0.1.1
-Add `platform` to the job prototype.
+### Added
+- `platform` object now accessible to jobs as `this.platform`.
 
 ## v0.1.0
-Initial minor release.
+Initial release.

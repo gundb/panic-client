@@ -3,6 +3,9 @@
 var panic = require('./panic');
 var parse = require('./parser');
 
+/** Shared state across all jobs.*/
+var state = {};
+
 // Function.prototype.bind
 require('phantomjs-polyfill');
 
@@ -74,6 +77,31 @@ Job.prototype = {
 			job.fail('Timeout reached: ' + time + 'ms');
 		}, time);
 		return job;
+	},
+
+	/**
+	 * Sets a value into a shared state object.
+	 *
+	 * @param  {String} key - A name for the value.
+	 * @param  {Mixed} value - The variable to expose to other jobs.
+	 * @returns {Mixed} - The value you just set.
+	 */
+	set: function (key, value) {
+		state[key] = value;
+		return value;
+	},
+
+	/**
+	 * Looks up variables in an object shared by all jobs.
+	 *
+	 * @param  {String} key - The name of the value.
+	 * @returns {Mixed} - The value, if found (otherwise `undefined`).
+	 */
+	get: function (key) {
+		if (state.hasOwnProperty(key) === false) {
+			return undefined;
+		}
+		return state[key];
 	},
 
 	/*

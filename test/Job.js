@@ -1,5 +1,5 @@
 /*globals describe, it, beforeEach*/
-/*eslint "no-new": "off"*/
+/*eslint-disable no-new */
 'use strict';
 
 var Job = require('../src/Job');
@@ -18,6 +18,12 @@ describe('A job', function () {
 		cb = (function () {}).toString();
 	});
 
+	beforeEach(function () {
+		panic.connection.on(key, function (err) {
+			expect(err).not.to.be.an.instanceof(Error);
+		});
+	});
+
 	it('should eval and call function strings', function (done) {
 		panic.connection.on(key, done);
 		new Job(cb, key);
@@ -31,9 +37,6 @@ describe('A job', function () {
 	});
 
 	it('should not export local variables by default', function () {
-		panic.connection.on(key, function (err) {
-			expect(err).not.to.be.an.instanceof(Error);
-		});
 		new Job(function () {
 			if (typeof scope !== 'undefined') {
 				throw new Error('Scope should not be defined');
@@ -44,9 +47,6 @@ describe('A job', function () {
 	});
 
 	it('should allow you to export vars', function () {
-		panic.connection.on(key, function (err) {
-			expect(err).not.to.be.an.instanceof(Error);
-		});
 		new Job(function () {
 			if (typeof scope === 'undefined') {
 				throw new Error('The scope variable should be defined');
@@ -68,9 +68,6 @@ describe('A job', function () {
 	});
 
 	it('should allow async execution', function (done) {
-		panic.connection.on(key, function (err) {
-			expect(err).not.to.be.an.instanceof(Error);
-		});
 		var obj = {};
 		new Job(function (done) {
 			setTimeout(function () {
@@ -86,5 +83,40 @@ describe('A job', function () {
 			expect(obj.async).to.eq(true);
 			done();
 		}, 20);
+	});
+
+	describe('state setter', function () {
+		it('should allow other jobs to use the value', function () {
+			new Job(function () {
+				this.set('value', 5);
+			}.toString(), key);
+
+			new Job(function () {
+				var value = this.get('value');
+				if (value !== 5) {
+					throw new Error('Expected value to be 5');
+				}
+			}.toString(), key);
+		});
+
+		it('should return the value it just set', function () {
+			new Job(function () {
+				var value = this.set('data', 'value');
+				if (value !== 'value') {
+					throw new Error('Expected value to be "value"');
+				}
+			}.toString(), key);
+		});
+	});
+
+	describe('state getter', function () {
+		it('should ignore prototype properties', function () {
+			new Job(function () {
+				var value = this.get('toString');
+				if (value !== undefined) {
+					throw new Error('Expected value to be undefined');
+				}
+			}.toString(), key);
+		});
 	});
 });
