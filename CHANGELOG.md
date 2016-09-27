@@ -1,8 +1,11 @@
 # Changelog
 
-## Unreleased
+## v0.3.0
 ### Added
 - Shared job state with `this.set` and `this.get`.
+
+### Removed
+- `panic.js` build from git. It'll still be published on npm.
 
 ## v0.2.0
 ### Changed
