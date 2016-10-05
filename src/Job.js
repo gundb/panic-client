@@ -9,6 +9,10 @@ var state = {};
 // Function.prototype.bind
 require('phantomjs-polyfill');
 
+/**
+ * Add more debugging data to stringified errors.
+ * @return {Object} - An object safe to send over the wire.
+ */
 Error.prototype.toJSON = function () {
 	return {
 		message: this.message,
@@ -22,23 +26,49 @@ Error.prototype.toJSON = function () {
 	Function.prototype.length (or getters),
 	this is a simple "polyfill".
 */
+/**
+ * Get the number of parameters a function
+ * is expecting in a IE6-safe manner.
+ * @param  {String} raw - A stringified function.
+ * @return {Number} - The number of parameters it's expecting.
+ */
 function params (raw) {
+
+	/** Capture the arguments group. */
 	var parens = raw.match(/\((.*?)\)/);
+
+	/** Grab that group. */
 	var args = parens && parens[1];
+
 	if (args && args.length) {
+
+		/** If there are arguments, count the commas. */
 		return args.split(',').length;
 	}
+
+	/** Otherwise, no params. */
 	return 0;
 }
 
+/**
+ * Run a stringified function as a job and
+ * report errors or successful completion.
+ * @param {String} raw - A stringified function.
+ * @param {String} id - A unique job ID.
+ * @param {Object} [scope] - Properties associated
+ * with the job.
+ * @class Job
+ */
 function Job(raw, id, scope) {
 	if (!(this instanceof Job)) {
 		return new Job(raw, id, scope);
 	}
+
 	this._ = {
 		raw: raw,
 		id: id
 	};
+
 	this.data = scope || {};
 
 	var cb;
@@ -48,17 +78,27 @@ function Job(raw, id, scope) {
 		cb = parse(raw, {});
 	}
 
+	/**
+	 * Allow done and fail to be called indifferent
+	 * of the `this` context.
+	 */
 	this.done = this.done.bind(this);
 	this.fail = this.fail.bind(this);
 
 	try {
+
+		/** If async, pass the done callback. */
 		if (params(raw) > 0) {
 			cb.call(this, this.done);
 		} else {
+
+			/** If sync, call done after. */
 			cb.call(this);
 			this.done();
 		}
 	} catch (err) {
+
+		/** Catch sync errors and report them. */
 		this.fail(err);
 	}
 }
@@ -70,7 +110,12 @@ Job.prototype = {
 	data: null,
 	platform: panic.platform,
 
-	// default timeout
+	/**
+	 * Set a client-relative job timeout. Fails
+	 * the job if it hasn't terminated by the timeout.
+	 * @param  {Number} time - The milliseconds to fail after.
+	 * @return {this} - The current context.
+	 */
 	timeout: function (time) {
 		var job = this;
 		setTimeout(function () {
@@ -104,26 +149,34 @@ Job.prototype = {
 		return state[key];
 	},
 
-	/*
-	 * Mark a test as finished.
-	 * Calling `done` more than
-	 * once does nothing.
-	 **/
+	/**
+	 * Report the job as successful.
+	 * @return {this} - The current context.
+	 */
 	done: function () {
 		return this._terminate();
 	},
 
-	/*
-	 * Permanently fail a test,
-	 * preventing `done` from firing.
-	 **/
+	/**
+	 * Report job failure.
+	 * @param  {Mixed} error
+	 * If an error is passed, it's extended and reported.
+	 * If a string is passed, it's used as the
+	 * error message.
+	 * If nothing is passed, a default message is assigned.
+	 * @return {this} - The current context.
+	 */
 	fail: function (error) {
 
+		/** Make sure it's an error object. */
 		if (!(error instanceof Object)) {
 			error = new Error(error);
 		}
 
+		/** Set a default error message. */
 		error.message = error.message || 'No error message.';
+
+		/** Extend the error for better debugging. */
 		error.source = error.source || this.toSource();
 
 		return this._terminate({
@@ -131,21 +184,35 @@ Job.prototype = {
 		});
 	},
 
-	/*
-	 * End the test
-	 **/
+	/**
+	 * Send a report back to the server. Can be
+	 * success or failure, and ensures the report
+	 * is only sent once.
+	 * @param  {Object} [result] - The report to send.
+	 * @return {this} - The current context.
+	 */
 	_terminate: function (result) {
+
+		/** Stop if the job already terminated. */
 		if (this._.ended) {
 			return this;
 		}
 
+		/** Create a report if there is none. */
 		var report = result || {};
 		this._.ended = true;
+
+		/** Emit back on the job ID. */
 		panic.connection.emit(this._.id, report);
 
 		return this;
 	},
 
+	/**
+	 * Gets the stringified function the job was
+	 * created from.
+	 * @return {String} - The source function.
+	 */
 	toSource: function () {
 		return this._.raw;
 	}

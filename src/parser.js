@@ -14,7 +14,12 @@
 	in the object (second param).
 */
 
-// polyfill `arguments` for IE6
+/**
+ * Take a function string and evaluate it,
+ * optionally injecting local variables.
+ * Includes hackery for IE6 compatibility.
+ * @return {Function} - The evaluated function.
+ */
 module.exports = function () {
 	var arguments = module.exports.arguments || arguments;
 	var PANIC_CB_FUNCTION;
