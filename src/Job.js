@@ -117,23 +117,31 @@ Job.prototype = {
 	 * Permanently fail a test,
 	 * preventing `done` from firing.
 	 **/
-	fail: function (err) {
-		err = err instanceof Object ? err : new Error(err);
-		err.message = err.message || 'No error message.';
-		err.source = err.source || this.toSource();
+	fail: function (error) {
 
-		return this._terminate(err);
+		if (!(error instanceof Object)) {
+			error = new Error(error);
+		}
+
+		error.message = error.message || 'No error message.';
+		error.source = error.source || this.toSource();
+
+		return this._terminate({
+			error: error
+		});
 	},
 
 	/*
 	 * End the test
 	 **/
-	_terminate: function (error) {
+	_terminate: function (result) {
 		if (this._.ended) {
 			return this;
 		}
+
+		var report = result || {};
 		this._.ended = true;
-		panic.connection.emit(this._.id, error);
+		panic.connection.emit(this._.id, report);
 
 		return this;
 	},

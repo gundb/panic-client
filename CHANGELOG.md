@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+### Changed
+- Jobs emit a report when finished, instead of an error or nothing. This gives the report details space to grow in the future.
+
 ## v0.3.0
 ### Added
 - Shared job state with `this.set` and `this.get`.

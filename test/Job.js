@@ -19,13 +19,14 @@ describe('A job', function () {
 	});
 
 	beforeEach(function () {
-		panic.connection.on(key, function (err) {
-			expect(err).not.to.be.an.instanceof(Error);
+		panic.connection.on(key, function (report) {
+			expect(report.error).not.to.be.an.instanceof(Error);
 		});
 	});
 
 	it('should eval and call function strings', function (done) {
-		panic.connection.on(key, done);
+		var finished = done.bind(null, null);
+		panic.connection.on(key, finished);
 		new Job(cb, key);
 	});
 
