@@ -14,6 +14,7 @@
 - Job#timeout has been removed. Use `setTimeout(this.fail)` instead.
 - The `done` callback is no longer passed. Instead, use `var done = this.async()`, or return a promise.
 - The socket is no longer accessible as `this.socket`. Use `panic.connection` instead.
+- The `@scope` is no longer supported. It just caused too much confusion.
 
 ## v0.3.0
 ### Added
