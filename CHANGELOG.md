@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## v1.0.0
 ### Added
 - Promise support. If you return a promise from a job, it's treated as an async job.
 - You can now send values *back* to the server. Any value returned (or resolved) is sent back in the job report.
