@@ -2,7 +2,8 @@
 
 var io = require('socket.io-client');
 var platform = require('platform');
-var Job, panic;
+var job = require('./job');
+var panic;
 
 /**
  * Handshakes with a panic server.
@@ -11,10 +12,15 @@ var Job, panic;
  */
 function server(url) {
 	var socket = panic.connection = io.connect(url);
-	Job.prototype.socket = socket;
 
 	/** Do whatever the server says. */
-	socket.on('run', Job);
+	socket.on('run', function (source, id, props) {
+		job(socket, {
+			source: source,
+			props: props,
+			id: id
+		});
+	});
 
 	/** Perform an initial handshake. */
 	socket.emit('handshake', platform);
@@ -31,5 +37,3 @@ panic = module.exports = {
 	/** The platform.js object. */
 	platform: platform
 };
-
-Job = require('./Job');

@@ -1,8 +1,19 @@
 # Changelog
 
 ## Unreleased
+### Added
+- Promise support. If you return a promise from a job, it's treated as an async job.
+- You can now send values *back* to the server. Any value returned (or resolved) is sent back in the job report.
+- The context is now passed as the first (and only) parameter.
+- New `.async` method to replace the `done` parameter.
+
 ### Changed
 - Jobs emit a report when finished, instead of an error or nothing. This gives the report details space to grow in the future.
+
+### Removed
+- Job#timeout has been removed. Use `setTimeout(this.fail)` instead.
+- The `done` callback is no longer passed. Instead, use `var done = this.async()`, or return a promise.
+- The socket is no longer accessible as `this.socket`. Use `panic.connection` instead.
 
 ## v0.3.0
 ### Added

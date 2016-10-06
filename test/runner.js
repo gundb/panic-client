@@ -4,7 +4,7 @@ var runner = require('../src/runner');
 var expect = require('expect');
 var Promise = require('bluebird');
 
-describe.only('A runner job', function () {
+describe('A runner job', function () {
 
 	this.timeout(500);
 
