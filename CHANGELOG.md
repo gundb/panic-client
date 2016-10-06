@@ -9,6 +9,8 @@
 
 ### Changed
 - Jobs emit a report when finished, instead of an error or nothing. This gives the report details space to grow in the future.
+- `this.data` renamed to `this.props` for clarity.
+- `panic.connection` is now `panic.socket`.
 
 ### Removed
 - Job#timeout has been removed. Use `setTimeout(this.fail)` instead.
