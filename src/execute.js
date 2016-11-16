@@ -42,6 +42,17 @@ function execute (socket, job) {
 	})
 	.catch(function (error) {
 
+		/** Turn error strings into Error objects. */
+		if (typeof error === 'string') {
+			var message = error;
+			error = new Error(message);
+		}
+
+		/** Supply a default error message. */
+		if (!error.message) {
+			error.message = 'Panic job failed, no error message given.';
+		}
+
 		/**
 		 * Turn errors into something JSON
 		 * can handle, plus some extra debugging info.

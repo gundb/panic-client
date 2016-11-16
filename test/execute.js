@@ -60,6 +60,23 @@ describe('A job', function () {
 		});
 	});
 
+	it('should turn failure strings into error objects', function () {
+		job.source = String(function () {
+			this.fail(this.props.msg);
+		});
+
+		job.props = {
+			msg: 'execute() failure message test.',
+		};
+
+		socket.on(job.id, spy);
+
+		return execute(socket, job).then(function () {
+			var report = spy.calls[0].arguments[0];
+			expect(report.error.message).toBe(job.props.msg);
+		});
+	});
+
 	it('should attach debugging info to errors', function () {
 		job.source = String(function () {
 			throw new Error('Testing debugging extensions.');
@@ -72,6 +89,21 @@ describe('A job', function () {
 			var error = report.error;
 			expect(error.platform).toBeAn(Object);
 			expect(error.source).toBe(job.source);
+		});
+	});
+
+	it('should provide a default error message', function () {
+		job.source = String(function () {
+			// No message.
+			throw new Error();
+		});
+
+		socket.on(job.id, spy);
+
+		return execute(socket, job).then(function () {
+			var report = spy.calls[0].arguments[0];
+			expect(report.error.message)
+				.toBe('Panic job failed, no error message given.');
 		});
 	});
 
