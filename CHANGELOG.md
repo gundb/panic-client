@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.0.1
+## Fixed
+- If `job.fail` was called with just a string, it wouldn't be used as an error message (regression from previous versions, now tested).
+- If a failure doesn't provide an error message, panic now gives a default (another regression).
+
 ## v1.0.0
 ### Added
 - Promise support. If you return a promise from a job, it's treated as an async job.
