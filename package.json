@@ -1,6 +1,6 @@
 {
   "name": "panic-client",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Test client for panic-server",
   "main": "src/index.js",
   "dependencies": {
